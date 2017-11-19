@@ -2,15 +2,17 @@
 
 The **xComputerManagement** module contains the following resources:
 
-* xComputer - allows you to configure a computer by changing its name and
+* **xComputer** - allows you to configure a computer by changing its name and
   modifying its domain or workgroup.
-* xOfflineDomainJoin - allows you to join computers to an AD Domain using
+* **Language** Configure Language Settings on Windows Operating System
+* **LanguagePack** Install or remove Windows Language Pack
+* **xOfflineDomainJoin** - allows you to join computers to an AD Domain using
   an [Offline Domain Join](https://technet.microsoft.com/en-us/library/offline-domain-join-djoin-step-by-step(v=ws.10).aspx)
   request file.
-* xScheduledTask - used to define basic recurring scheduled tasks on the
+* **xScheduledTask** - used to define basic recurring scheduled tasks on the
   local computer.
-* xPowerPlan - specifies a power plan to activate.
-* xVirtualMemory - used to set the properties of the paging file on the
+* **xPowerPlan** - specifies a power plan to activate.
+* **xVirtualMemory** - used to set the properties of the paging file on the
   local computer.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
@@ -45,16 +47,16 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 xComputer resource has following properties:
 
-* Name: The desired computer name.
-* DomainName: The name of the domain to join.
-* JoinOU: The distinguished name of the organizational unit that the computer
+* **Name**: The desired computer name.
+* **DomainName**: The name of the domain to join.
+* **JoinOU**: The distinguished name of the organizational unit that the computer
   account will be created in.
-* WorkGroupName: The name of the workgroup.
-* Credential: Credential to be used to join a domain.
-* UnjoinCredential: Credential to be used to leave a domain.
-* CurrentOU: A read-only property that specifies the organizational unit that
+* **WorkGroupName**: The name of the workgroup.
+* **Credential**: Credential to be used to join a domain.
+* **UnjoinCredential**: Credential to be used to leave a domain.
+* **CurrentOU**: A read-only property that specifies the organizational unit that
   the computer account is currently in.
-* Description: The value assigned here will be set as the local computer description.
+* **Description**: The value assigned here will be set as the local computer description.
 
 ### xComputer Examples
 
@@ -65,13 +67,46 @@ xComputer resource has following properties:
 * [Switch from a Domain to a Workgroup](/Examples/xComputer/5-UnjoinDomainAndJoinWorkgroup.ps1)
 * [Set a Description for the Workstation](/Examples/xComputer/6-SetComputerDescriptionInWorkgroup.ps1)
 
+### Language
+
+This resource will configure the user and system locales, display language (if already installed), keyboard layout and will copy to system and new user accounts.
+
+* **IsSingleInstance**: Must be set to Yes, this avoids multiple Language configurations in the same configuration which would create conflicts
+* **LocationID**: Decimal value of the location code to be set eg. 242.  Values can be found at: https://msdn.microsoft.com/en-us/library/windows/desktop/dd374073(v=vs.85).aspx
+* **MUILanguage**: Display Language to use used eg. "en-GB"
+* **MUIFallbackLanguage**: Language Pack to be used when the primary language pack isn't complete  eg. "en-US"
+* **SystemLocale**:  Language name for the System Locale eg. "en-GB"
+* **AddInputLanguages**: Array of all input Languages to add, these must be in the long LCID format  eg. @("0809:00000809")
+* **RemoveInputLanguages**: Array of all input Languages to be removed, these must be in the long LCID format @("0409:00000409")
+* **UserLocale**:  Language name for the user Locale eg. "en-GB"
+* **CopySystem**: Copy the configuration to the system accounts eg. $true
+* **CopyNewUser**: Copy the configuration to all new user accounts eg. $true
+
+### xLanguage Examples
+
+* [Configure the Language on a system](/Examples/xLanguage/1-ConfigureLanguage.ps1)
+* [Install and language pack and configure the system to use it](/Examples/xLanguage/2-CombinedResourceUse.ps1)
+
+### LanguagePack
+
+This resource will install or remove a single language pack from the target system.  When installing a language pack a install location must be specified.  When removing a language pack a install location is not required.  The system requires a reboot after installation or removal of a language pack.
+
+* **LanguagePackName**: Name of the Language to be effected, eg. en-GB
+* **LanguagePackLocation**: When installing a language pack the install files must be made available to the system.  This can be an UNC path accessible to the target node.
+* **Ensure**: Default is Present, this will attempt to install the language pack if it is not already installed.  The other option is Absent which will attempt to remove the language pack if present.
+
+### xLanguagePack Examples
+
+* [Install Language Pack](/Examples/xLanguage/1-InstallLanguagePack.ps1)
+* [Remove Language Pack](/Examples/xLanguage/2-RemoveLanguagePack.ps1)
+
 ## xOfflineDomainJoin
 
 xOfflineDomainJoin resource is a [Single Instance](https://msdn.microsoft.com/en-us/powershell/dsc/singleinstance)
 resource that can only be used once in a configuration and has following properties:
 
-* IsSingleInstance: Must be set to 'Yes'. Required.
-* RequestFile: The full path to the Offline Domain Join request file. Required.
+* **IsSingleInstance**: Must be set to 'Yes'. Required as this avoids multiple Language configurations in the same configuration which would create conflicts
+* **RequestFile**: The full path to the Offline Domain Join request file. Required.
 
 ### xOfflineDomainJoin Examples
 
@@ -84,84 +119,84 @@ local computer.
 Tasks are created to run based on the schedule defined.
 xScheduledTask has the following properties:
 
-* TaskName: The name of the task
-* TaskPath: The path to the task - defaults to the root directory
-* Description: The task description
-* ActionExecutable: The path to the .exe for this task
-* ActionArguments: The arguments to pass the executable
-* ActionWorkingPath: The working path to specify for the executable
-* ScheduleType: When should the task be executed
+* **TaskName**: The name of the task
+* **TaskPath**: The path to the task - defaults to the root directory
+* **Description**: The task description
+* **ActionExecutable**: The path to the .exe for this task
+* **ActionArguments**: The arguments to pass the executable
+* **ActionWorkingPath**: The working path to specify for the executable
+* **ScheduleType**: When should the task be executed
   ("Once", "Daily", "Weekly", "AtStartup", "AtLogOn")
-* RepeatInterval: How many units (minutes, hours, days) between each run of this
+* **RepeatInterval**: How many units (minutes, hours, days) between each run of this
   task?
-* StartTime: The time of day this task should start at - defaults to 12:00 AM.
+* **StartTime**: The time of day this task should start at - defaults to 12:00 AM.
   Not valid for AtLogon and AtStartup tasks
-* Ensure: Present if the task should exist, false if it should be removed - defaults
+* **Ensure**: Present if the task should exist, false if it should be removed - defaults
   to Present.
-* Enable: True if the task should be enabled, false if it should be
+* **Enable**: True if the task should be enabled, false if it should be
   disabled
-* ExecuteAsCredential: The credential this task should execute as. If not
+* **ExecuteAsCredential**: The credential this task should execute as. If not
   specified defaults to running as the local system account
-* DaysInterval: Specifies the interval between the days in the schedule. An
+* **DaysInterval**: Specifies the interval between the days in the schedule. An
   interval of 1 produces a daily schedule. An interval of 2 produces an
   every-other day schedule.
-* RandomDelay: Specifies a random amount of time to delay the start time of the
+* **RandomDelay**: Specifies a random amount of time to delay the start time of the
   trigger. The delay time is a random time between the time the task triggers
   and the time that you specify in this setting.
-* RepetitionDuration: Specifies how long the repetition pattern repeats after
+* **RepetitionDuration**: Specifies how long the repetition pattern repeats after
   the task starts. May be set to `Indefinitely` to specify an indefinite duration.
-* DaysOfWeek: Specifies an array of the days of the week on which Task Scheduler
+* **DaysOfWeek**: Specifies an array of the days of the week on which Task Scheduler
   runs the task.
-* WeeksInterval: Specifies the interval between the weeks in the schedule. An
+* **WeeksInterval**: Specifies the interval between the weeks in the schedule. An
   interval of 1 produces a weekly schedule. An interval of 2 produces an
   every-other week schedule.
-* User: Specifies the identifier of the user for a trigger that starts a task
+* **User**: Specifies the identifier of the user for a trigger that starts a task
   when a user logs on.
-* DisallowDemandStart: Indicates whether the task is prohibited to run on demand
+* **DisallowDemandStart**: Indicates whether the task is prohibited to run on demand
   or not. Defaults to $false
 * DisallowHardTerminate: Indicates whether the task is prohibited to be terminated
   or not. Defaults to $false
-* Compatibility: The task compatibility level. Defaults to Vista. Possible
+* **Compatibility**: The task compatibility level. Defaults to Vista. Possible
   values: "AT","V1","Vista","Win7","Win8"
-* AllowStartIfOnBatteries: Indicates whether the task should start if the machine
+* **AllowStartIfOnBatteries**: Indicates whether the task should start if the machine
   is on batteries or not. Defaults to $false
-* Hidden: Indicates that the task is hidden in the Task Scheduler UI. Defaults
+* **Hidden**: Indicates that the task is hidden in the Task Scheduler UI. Defaults
   to $false
-* RunOnlyIfIdle: Indicates that Task Scheduler runs the task only when the
+* **RunOnlyIfIdle**: Indicates that Task Scheduler runs the task only when the
   computer is idle.
-* IdleWaitTimeout: Specifies the amount of time that Task Scheduler waits for an
+* **IdleWaitTimeout**: Specifies the amount of time that Task Scheduler waits for an
   idle condition to occur. DateTime ;
-* NetworkName: Specifies the name of a network profile that Task Scheduler uses
+* **NetworkName**: Specifies the name of a network profile that Task Scheduler uses
   to determine if the task can run. The Task Scheduler UI uses this setting for
   display purposes. Specify a network name if you specify theRunOnlyIfNetworkAvailable
   parameter.
-* DisallowStartOnRemoteAppSession: Indicates that the task does not start if the
+* **DisallowStartOnRemoteAppSession**: Indicates that the task does not start if the
   task is triggered to run in a Remote Applications Integrated Locally (RAIL) session.
-* StartWhenAvailable: Indicates that Task Scheduler can start the task at any
+* **StartWhenAvailable**: Indicates that Task Scheduler can start the task at any
   time after its scheduled time has passed.
-* DontStopIfGoingOnBatteries: Indicates that the task does not stop if the
+* **DontStopIfGoingOnBatteries**: Indicates that the task does not stop if the
   computer switches to battery power.
-* WakeToRun: Indicates that Task Scheduler wakes the computer before it runs the
+* **WakeToRun**: Indicates that Task Scheduler wakes the computer before it runs the
   task.
-* IdleDuration: Specifies the amount of time that the computer must be in an idle
+* **IdleDuration**: Specifies the amount of time that the computer must be in an idle
   state before Task Scheduler runs the task.
-* RestartOnIdle: Indicates that Task Scheduler restarts the task when the computer
+* **RestartOnIdle**: Indicates that Task Scheduler restarts the task when the computer
   cycles into an idle condition more than once.
-* DontStopOnIdleEnd: Indicates that Task Scheduler does not terminate the task if
+* **DontStopOnIdleEnd**: Indicates that Task Scheduler does not terminate the task if
   the idle condition ends before the task is completed.
-* ExecutionTimeLimit: Specifies the amount of time that Task Scheduler is allowed
+* **ExecutionTimeLimit**: Specifies the amount of time that Task Scheduler is allowed
   to complete the task.
-* MultipleInstances: Specifies the policy that defines how Task Scheduler handles
+* **MultipleInstances**: Specifies the policy that defines how Task Scheduler handles
   multiple instances of the task. Possible values: "IgnoreNew","Parallel","Queue"
-* Priority: Specifies the priority level of the task. Priority must be an integer
+* **Priority**: Specifies the priority level of the task. Priority must be an integer
   from 0 (highest priority) to 10 (lowest priority). The default value is 7.
   Priority levels 7 and 8 are used for background tasks. Priority levels 4, 5,
   and 6 are used for interactive tasks.
-* RestartCount: Specifies the number of times that Task Scheduler attempts to
+* **RestartCount**: Specifies the number of times that Task Scheduler attempts to
   restart the task.
-* RestartInterval: Specifies the amount of time that Task Scheduler attempts to
+* **RestartInterval**: Specifies the amount of time that Task Scheduler attempts to
   restart the task.
-* RunOnlyIfNetworkAvailable: Indicates that Task Scheduler runs the task only
+* **RunOnlyIfNetworkAvailable**: Indicates that Task Scheduler runs the task only
   when a network is available. Task Scheduler uses the NetworkID parameter and
   NetworkName parameter that you specify in this cmdlet to determine if the
   network is available.
@@ -181,9 +216,9 @@ xScheduledTask has the following properties:
 
 xPowerPlan resource has following properties:
 
-* IsSingleInstance: Specifies the resource is a single instance, the value must
+* **IsSingleInstance**: Specifies the resource is a single instance, the value must
   be 'Yes'.
-* Name: The name of the power plan to activate.
+* **Name**: The name of the power plan to activate.
 
 ### xPowerPlan Examples
 
@@ -195,12 +230,12 @@ xVirtualMemory resource is used to set the properties of the paging file on the
 local computer.
 xVirtualMemory has the following properties:
 
-* Type: The type of the paging settings, mandatory, out of "AutoManagePagingFile",
+* **Type**: The type of the paging settings, mandatory, out of "AutoManagePagingFile",
   "CustomSize","SystemManagedSize","NoPagingFile"
-* Drive: The drive to enable paging on, mandatory. Ignored for "AutoManagePagingFile"
-* InitialSize: The initial size in MB of the paging file. Ignored for Type
+* **Drive**: The drive to enable paging on, mandatory. Ignored for "AutoManagePagingFile"
+* **InitialSize**: The initial size in MB of the paging file. Ignored for Type
   "AutoManagePagingFile" and "SystemManagedSize"
-* MaximumSize: The maximum size in MB of the paging file. Ignored for Type
+* **MaximumSize**: The maximum size in MB of the paging file. Ignored for Type
   "AutoManagePagingFile" and "SystemManagedSize"
 
 ### xVirtualMemory Examples
@@ -211,6 +246,10 @@ xVirtualMemory has the following properties:
 
 ### Unreleased
 
+* xLanguage:
+  * Migrated LanguageDSC Resource into xComputerManagement.
+* xLanguagePack:
+  * Migrated LanguageDSC Resource into xComputerManagement.
 * xOfflineDomainJoin:
   * Updated to meet HQRM guidelines.
 
